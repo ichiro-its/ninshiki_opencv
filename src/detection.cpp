@@ -27,19 +27,12 @@ namespace ninshiki_opencv
 Detection::Detection()
 : field_classifier(new ColorClassifier(ColorClassifier::CLASSIFIER_TYPE_FIELD))
 {
-  // field_classifier->setHue(89);
-  // field_classifier->setHueTolerance(54);
-  // field_classifier->setMinSaturation(20);
-  // field_classifier->setMaxSaturation(100);
-  // field_classifier->setMinValue(28);
-  // field_classifier->setMaxValue(100);
-
-  field_classifier->set_hue_min(33);
-  field_classifier->set_hue_max(68);
-  field_classifier->set_sat_min(102);
-  field_classifier->set_sat_max(255);
-  field_classifier->set_val_min(0);
-  field_classifier->set_val_max(255);
+  field_classifier->setHue(71);
+  field_classifier->setHueTolerance(25);
+  field_classifier->setMinSaturation(40);
+  field_classifier->setMaxSaturation(100);
+  field_classifier->setMinValue(0);
+  field_classifier->setMaxValue(100);
 
   ball_pos_x = -1;
   ball_pos_y = -1;
@@ -63,15 +56,13 @@ void Detection::vision_process(cv::Mat image_hsv, cv::Mat image_rgb)
   LBPClassifier * lbp_classifier = new LBPClassifier(LBPClassifier::CLASSIFIER_TYPE_BALL);
 
   cv::Size mat_size = image_hsv.size();
-  cv::Mat field_binary_mat = field_classifier->classify_hsv(image_hsv);
-  // cv::Mat ball_binary_mat = ball_classifier->classify(image_hsv);
+  cv::Mat field_binary_mat = field_classifier->classify(image_hsv);
 
   Contours field_contours(field_binary_mat);
   field_contours.filterLargerThen(700.0);
   field_contours.joinAll();
   field_contours.convexHull();
   field_contours.getContours();
-  // std::cout << field_contours.minX() << std::endl;
 
   cv::Mat field_contours_mat = field_contours.getBinaryMatLine(mat_size, 4);
   cv::Mat lbp_input = image_rgb.clone();
@@ -86,8 +77,6 @@ void Detection::vision_process(cv::Mat image_hsv, cv::Mat image_rgb)
 
   ball_pos_x = ball_rects.getFirstRectCenter().x;
   ball_pos_y = ball_rects.getFirstRectCenter().y;
-
-  // return field_binary_mat;
 }
 
 }  // namespace ninshiki_opencv
