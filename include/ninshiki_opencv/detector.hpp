@@ -18,8 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#ifndef NINSHIKI_OPENCV__DETECTION_HPP_
-#define NINSHIKI_OPENCV__DETECTION_HPP_
+#ifndef NINSHIKI_OPENCV__DETECTOR_HPP_
+#define NINSHIKI_OPENCV__DETECTOR_HPP_
 
 #include <opencv2/opencv.hpp>
 #include <robocup_client/robocup_client.hpp>
@@ -51,4 +51,4 @@ private:
 
 }  // namespace ninshiki_opencv
 
-#endif  // NINSHIKI_OPENCV__DETECTION_HPP_
+#endif  // NINSHIKI_OPENCV__DETECTOR_HPP_

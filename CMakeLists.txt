@@ -38,7 +38,7 @@ install(TARGETS ${PROJECT_NAME}
   LIBRARY DESTINATION "lib"
   RUNTIME DESTINATION "bin")
 
-add_executable(example "example/example.cpp")
+add_executable(example "examples/ball_detection_example")
 target_link_libraries(example ${PROJECT_NAME})
 
 install(TARGETS example
