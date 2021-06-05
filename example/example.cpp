@@ -24,7 +24,7 @@
 #include <opencv2/core.hpp>
 #include <opencv2/videoio.hpp>
 #include <opencv2/highgui.hpp>
-#include <ninshiki_opencv/detection.hpp>
+#include <ninshiki_opencv/detector.hpp>
 #include <robocup_client/robocup_client.hpp>
 
 #include <unistd.h>

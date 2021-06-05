@@ -15,13 +15,13 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 find_package(ament_cmake REQUIRED)
+find_package(framework_vision REQUIRED)
+find_package(keisan REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(robocup_client REQUIRED)
-find_package(keisan REQUIRED)
-find_package(framework_vision REQUIRED)
 
 add_library(${PROJECT_NAME}
-  "src/detection.cpp")
+  "src/detector.cpp")
 
 target_include_directories(${PROJECT_NAME} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

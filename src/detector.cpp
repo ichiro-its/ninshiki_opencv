@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#include <ninshiki_opencv/detection.hpp>
+#include <ninshiki_opencv/detector.hpp>
 #include <memory>
 #include <string>
 
