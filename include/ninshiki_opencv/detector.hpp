@@ -43,7 +43,7 @@ public:
   float get_ball_pos_y() {return ball_pos_y;}
 
 private:
-  ColorClassifier * field_classifier;
+  std::shared_ptr<ColorClassifier> field_classifier;
 
   float ball_pos_x;
   float ball_pos_y;

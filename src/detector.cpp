@@ -25,7 +25,7 @@
 namespace ninshiki_opencv
 {
 Detector::Detector()
-: field_classifier(new ColorClassifier(ColorClassifier::CLASSIFIER_TYPE_FIELD))
+: field_classifier(std::make_shared<ColorClassifier>(ColorClassifier::CLASSIFIER_TYPE_FIELD))
 {
   field_classifier->setHue(71);
   field_classifier->setHueTolerance(25);

@@ -64,21 +64,21 @@ int main(int argc, char * argv[])
     if (sensors.get()->cameras_size() > 0) {
       std::cout << sensors.get()->cameras(0).height() << std::endl;
 
-      ninshiki_opencv::Detection detection;
-      cv::Mat temp = detection.get_image(sensors);
+      ninshiki_opencv::Detector detector;
+      cv::Mat temp = detector.get_image(sensors);
 
       frame = temp.clone();
       frame_hsv = temp.clone();
       cv::cvtColor(frame, frame_hsv, cv::COLOR_BGR2HSV);
 
-      detection.vision_process(frame_hsv, frame);
+      detector.vision_process(frame_hsv, frame);
 
-      std::cout << "position x = " << detection.get_ball_pos_x() << std::endl;
-      std::cout << "position y = " << detection.get_ball_pos_y() << std::endl;
+      std::cout << "position x = " << detector.get_ball_pos_x() << std::endl;
+      std::cout << "position y = " << detector.get_ball_pos_y() << std::endl;
 
       // draw red circle on ball
       cv::circle(
-        frame, cv::Point(detection.get_ball_pos_x(), detection.get_ball_pos_y()), 12.5, cv::Scalar(
+        frame, cv::Point(detector.get_ball_pos_x(), detector.get_ball_pos_y()), 12.5, cv::Scalar(
           0, 0,
           255), cv::FILLED,
         cv::LINE_8);
