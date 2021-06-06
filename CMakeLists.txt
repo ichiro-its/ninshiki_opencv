@@ -11,7 +11,7 @@ if(NOT CMAKE_CXX_STANDARD)
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra -Wpedantic)
+  add_compile_options(-Wall -Wextra -Wpedantic -fPIC)
 endif()
 
 find_package(ament_cmake REQUIRED)
@@ -20,7 +20,7 @@ find_package(keisan REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(robocup_client REQUIRED)
 
-add_library(${PROJECT_NAME}
+add_library(${PROJECT_NAME} SHARED
   "src/detector.cpp")
 
 target_include_directories(${PROJECT_NAME} PUBLIC
