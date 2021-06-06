@@ -30,10 +30,10 @@
 
 namespace ninshiki_opencv
 {
-class Detection
+class Detector
 {
 public:
-  Detection();
+  Detector();
 
   void vision_process(cv::Mat image_hsv, cv::Mat image_rgb);
 

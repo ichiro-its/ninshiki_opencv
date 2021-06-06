@@ -24,7 +24,7 @@
 
 namespace ninshiki_opencv
 {
-Detection::Detection()
+Detector::Detector()
 : field_classifier(new ColorClassifier(ColorClassifier::CLASSIFIER_TYPE_FIELD))
 {
   field_classifier->setHue(71);
@@ -38,7 +38,7 @@ Detection::Detection()
   ball_pos_y = -1;
 }
 
-cv::Mat Detection::get_image(std::shared_ptr<SensorMeasurements> sensor)
+cv::Mat Detector::get_image(std::shared_ptr<SensorMeasurements> sensor)
 {
   cv::Mat temp;
 
@@ -51,7 +51,7 @@ cv::Mat Detection::get_image(std::shared_ptr<SensorMeasurements> sensor)
   return temp;
 }
 
-void Detection::vision_process(cv::Mat image_hsv, cv::Mat image_rgb)
+void Detector::vision_process(cv::Mat image_hsv, cv::Mat image_rgb)
 {
   LBPClassifier * lbp_classifier = new LBPClassifier(LBPClassifier::CLASSIFIER_TYPE_BALL);
 
