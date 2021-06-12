@@ -38,7 +38,7 @@ Detector::Detector()
   ball_pos_y = -1;
 }
 
-const cv::Mat & Detector::get_image(std::shared_ptr<SensorMeasurements> sensor) const
+cv::Mat Detector::get_image(std::shared_ptr<SensorMeasurements> sensor)
 {
   cv::Mat temp;
 

@@ -37,7 +37,7 @@ public:
 
   void vision_process(cv::Mat image_hsv, cv::Mat image_rgb);
 
-  const cv::Mat & get_image(std::shared_ptr<SensorMeasurements> sensor) const;
+  cv::Mat get_image(std::shared_ptr<SensorMeasurements> sensor);
   const Contours & get_field_contours() const;
 
   float get_ball_pos_x() {return ball_pos_x;}
