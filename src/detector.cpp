@@ -51,6 +51,11 @@ cv::Mat Detector::get_image(std::shared_ptr<SensorMeasurements> sensor)
   return temp;
 }
 
+const Contours & Detector::get_field_contours() const
+{
+  return field_contours;
+}
+
 void Detector::vision_process(cv::Mat image_hsv, cv::Mat image_rgb)
 {
   LBPClassifier * lbp_classifier = new LBPClassifier(LBPClassifier::CLASSIFIER_TYPE_BALL);
@@ -58,7 +63,7 @@ void Detector::vision_process(cv::Mat image_hsv, cv::Mat image_rgb)
   cv::Size mat_size = image_hsv.size();
   cv::Mat field_binary_mat = field_classifier->classify(image_hsv);
 
-  Contours field_contours(field_binary_mat);
+  field_contours = Contours(field_binary_mat);
   field_contours.filterLargerThen(700.0);
   field_contours.joinAll();
   field_contours.convexHull();
