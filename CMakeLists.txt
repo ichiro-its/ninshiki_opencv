@@ -21,6 +21,7 @@ find_package(OpenCV REQUIRED)
 find_package(robocup_client REQUIRED)
 
 add_library(${PROJECT_NAME} SHARED
+  "src/goalpost_finder.cpp"
   "src/detector.cpp")
 
 target_include_directories(${PROJECT_NAME} PUBLIC

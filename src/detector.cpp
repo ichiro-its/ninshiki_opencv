@@ -43,11 +43,11 @@ cv::Mat Detector::get_image(std::shared_ptr<SensorMeasurements> sensor)
   cv::Mat temp;
 
   auto camera = sensor.get()->cameras(0);
-  cv::Mat coba(static_cast<int>(camera.height()),
+  cv::Mat sensor_image(static_cast<int>(camera.height()),
     static_cast<int>(camera.width()), CV_8UC3, std::string(
       camera.image()).data());
 
-  temp = coba.clone();
+  temp = sensor_image.clone();
   return temp;
 }
 
