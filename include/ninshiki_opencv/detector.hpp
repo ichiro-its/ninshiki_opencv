@@ -23,6 +23,7 @@
 
 #include <opencv2/opencv.hpp>
 #include <robocup_client/robocup_client.hpp>
+#include <ninshiki_opencv/goalpost_finder.hpp>
 
 #include <memory>
 
@@ -35,7 +36,7 @@ class Detector
 public:
   Detector();
 
-  void vision_process(cv::Mat image_hsv, cv::Mat image_rgb);
+  void vision_process(std::shared_ptr<SensorMeasurements> sensor, cv::Mat image_hsv, cv::Mat image_rgb);
 
   cv::Mat get_image(std::shared_ptr<SensorMeasurements> sensor);
   const Contours & get_field_contours() const;
@@ -43,12 +44,24 @@ public:
   float get_ball_pos_x() {return ball_pos_x;}
   float get_ball_pos_y() {return ball_pos_y;}
 
+  float get_post_left_x() {return post_left_x;}
+  float get_post_left_y() {return post_left_y;}
+  float get_post_right_x() {return post_right_x;}
+  float get_post_right_y() {return post_right_y;}
+
 private:
   std::shared_ptr<ColorClassifier> field_classifier;
   Contours field_contours;
 
   float ball_pos_x;
   float ball_pos_y;
+
+  float post_left_x;
+  float post_left_y;
+  float post_right_x;
+  float post_right_y;
+
+  bool detect_goal_post;
 };
 
 }  // namespace ninshiki_opencv

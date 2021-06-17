@@ -25,6 +25,7 @@
 #include <opencv2/videoio.hpp>
 #include <opencv2/highgui.hpp>
 #include <ninshiki_opencv/detector.hpp>
+#include <ninshiki_opencv/goalpost_finder.hpp>
 #include <robocup_client/robocup_client.hpp>
 
 #include <unistd.h>
@@ -57,24 +58,32 @@ int main(int argc, char * argv[])
   cv::Mat frame_hsv;
   cv::Mat field_mask;
 
+  ninshiki_opencv::Detector detector;
+  ninshiki_opencv::GoalpostFinder goal_post;
+
   while (client.get_tcp_socket()->is_connected()) {
     client.send(*message.get_actuator_request());
     auto sensors = client.receive();
 
     if (sensors.get()->cameras_size() > 0) {
-      std::cout << sensors.get()->cameras(0).height() << std::endl;
+      // std::cout << sensors.get()->cameras(0).height() << std::endl;
+      auto coordinate = goal_post.detect_goal(sensors);
+      std::cout << "coordinate_post_left_x = " << coordinate[0].x << " coordinate_post_left_y = " << coordinate[0].y << std::endl;
+      std::cout << "coordinate_post_right_x = " << coordinate[1].x << " coordinate_post_right_y = " << coordinate[1].y << std::endl;
 
-      ninshiki_opencv::Detector detector;
       cv::Mat temp = detector.get_image(sensors);
+      if (coordinate[0].x > -1 && coordinate[0].y > -1 && coordinate[1].x > -1 && coordinate[1].y > -1) {
+        cv::rectangle(temp, coordinate[0], coordinate[1], cv::Scalar(255,0,0), 3);
+      }
 
       frame = temp.clone();
       frame_hsv = temp.clone();
       cv::cvtColor(frame, frame_hsv, cv::COLOR_BGR2HSV);
 
-      detector.vision_process(frame_hsv, frame);
+      detector.vision_process(sensors, frame_hsv, frame);
 
-      std::cout << "position x = " << detector.get_ball_pos_x() << std::endl;
-      std::cout << "position y = " << detector.get_ball_pos_y() << std::endl;
+      std::cout << "ball position x = " << detector.get_ball_pos_x() << std::endl;
+      std::cout << "ball position y = " << detector.get_ball_pos_y() << std::endl;
 
       // draw red circle on ball
       cv::circle(

@@ -22,6 +22,7 @@
 #define NINSHIKI_OPENCV__GOALPOST_FINDER_HPP_
 
 #include <opencv2/core/core.hpp>
+#include <opencv2/opencv.hpp>
 #include <robocup_client/robocup_client.hpp>
 
 #include <memory>

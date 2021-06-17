@@ -71,6 +71,8 @@ double GoalpostFinder::find_area_roi(cv::Mat fr, cv::Point stR, cv::Point spR)
       start_roi.x, start_roi.y, stop_roi.x - start_roi.x,
       stop_roi.y - start_roi.y));
   double totalArea = buff.cols * buff.rows;
+  
+  // cv::cvtColor(buff, buff, cv::COLOR_BGR2GRAY);
   double count = countNonZero(buff);
   buff.release();
   return count * 100 / totalArea;
@@ -78,45 +80,48 @@ double GoalpostFinder::find_area_roi(cv::Mat fr, cv::Point stR, cv::Point spR)
 
 std::vector<cv::Point> GoalpostFinder::detect_goal(std::shared_ptr<SensorMeasurements> sensor)
 {
-  auto camera = sensor.get()->cameras(0);
-  cv::Mat sensor_image(static_cast<int>(camera.height()),
-    static_cast<int>(camera.width()), CV_8UC3, std::string(
-      camera.image()).data());
-
-  image.create(camera_height, camera_width, CV_8UC3);
-  output_buffer.create(camera_height, camera_width, CV_8UC3);
-
-  cv::Point empty_point(-1, -1);
-  right_goal_coor = empty_point;
-  left_goal_coor = empty_point;
-  right_goal_height = 0;
-  left_goal_height = 0;
-  cv::Mat rgb(camera_height, camera_width, CV_8UC3);
-
-  left_goal_found = false;
-  right_goal_found = false;
-
-  left_goal_distance = 0.0;
-  right_goal_distance = 0.0;
-  rgb = sensor_image.clone();
-
-  image = rgb.clone();
-  process_image(sensor_image);
-  rgb.release();
-
-  output_buffer = image.clone();
-
   std::vector<cv::Point> coordinate(2);
-  coordinate[0] = left_goal_coor;
-  coordinate[1] = right_goal_coor;
+  if (sensor.get()->cameras_size() > 0) {
+    
+  auto camera = sensor.get()->cameras(0);
+    cv::Mat sensor_image(static_cast<int>(camera.height()),
+      static_cast<int>(camera.width()), CV_8UC3, std::string(
+        camera.image()).data());
+    
+    camera_height = camera.height();
+    camera_width = camera.width();
+    image.create(camera_height, camera_width, CV_8UC3);
+    output_buffer.create(camera_height, camera_width, CV_8UC3);
+    cv::Point empty_point(-1, -1);
+    right_goal_coor = empty_point;
+    left_goal_coor = empty_point;
+    right_goal_height = 0;
+    left_goal_height = 0;
+    cv::Mat rgb(camera_height, camera_width, CV_8UC3);
 
-  if (left_goal_coor.x > 0 && left_goal_coor.y > 0) {
-    left_goal_found = true;
-  }
-  if (right_goal_coor.x > 0 && right_goal_coor.y > 0) {
-    right_goal_found = true;
-  }
+    left_goal_found = false;
+    right_goal_found = false;
 
+    left_goal_distance = 0.0;
+    right_goal_distance = 0.0;
+    rgb = sensor_image.clone();
+
+    image = rgb.clone();
+    process_image(sensor_image);
+    rgb.release();
+
+    output_buffer = image.clone();
+
+    coordinate[0] = left_goal_coor;
+    coordinate[1] = right_goal_coor;
+    
+    if (left_goal_coor.x > 0 && left_goal_coor.y > 0) {
+      left_goal_found = true;
+    }
+    if (right_goal_coor.x > 0 && right_goal_coor.y > 0) {
+      right_goal_found = true;
+    }
+  }
   return coordinate;
 }
 
@@ -125,11 +130,13 @@ void GoalpostFinder::process_image(cv::Mat binBuffer)
   cv::Mat bw(camera_height, camera_width, CV_8UC1);
   cv::Mat bw2(camera_height, camera_width, CV_8UC1);
   cv::Mat bw1(camera_height, camera_width, CV_8UC1);
+  cv::Mat check(camera_height, camera_width, CV_8UC1);
   std::vector<cv::Vec2f> lines;
 
   bw = binBuffer.clone();
-  if (countNonZero(bw) > 10) {
-    cv::Mat element = getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
+  cv::cvtColor(bw, bw, cv::COLOR_BGR2GRAY);
+  if (countNonZero(check) > 10) {
+    cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
     morphologyEx(bw, bw, cv::MORPH_OPEN, element);
     morphologyEx(bw1, bw1, cv::MORPH_OPEN, element);
     Canny(bw, bw2, 100, 200);
@@ -251,8 +258,8 @@ void GoalpostFinder::process_line(std::vector<cv::Vec2f> garis, cv::Mat bw)
         left_goal_coor = cv::Point(cent_x, cent_y);
         goal_detected = false;
         if (draw_output) {
-          putText(image, "TLY", boundLeft[0], 1, 1.2, cv::Scalar(0, 255, 0), 1);
-          putText(image, "BLY", boundLeft[1], 1, 1.2, cv::Scalar(0, 255, 0), 1);
+          cv::putText(image, "TLY", boundLeft[0], 1, 1.2, cv::Scalar(0, 255, 0), 1);
+          cv::putText(image, "BLY", boundLeft[1], 1, 1.2, cv::Scalar(0, 255, 0), 1);
         }
       }
     }
@@ -328,8 +335,8 @@ void GoalpostFinder::process_line(std::vector<cv::Vec2f> garis, cv::Mat bw)
       right_goal_coor = real_center;
       goal_detected = false;
       if (draw_output) {
-        putText(image, "TRY", real_bound[0], 1, 1.2, cv::Scalar(0, 255, 0), 1);
-        putText(image, "BRY", real_bound[1], 1, 1.2, cv::Scalar(0, 255, 0), 1);
+        cv::putText(image, "TRY", real_bound[0], 1, 1.2, cv::Scalar(0, 255, 0), 1);
+        cv::putText(image, "BRY", real_bound[1], 1, 1.2, cv::Scalar(0, 255, 0), 1);
       }
     } else {
       if (draw_output) {draw_hough_line(meanRight, cv::Scalar(0, 255, 0));}
@@ -358,8 +365,8 @@ void GoalpostFinder::process_line(std::vector<cv::Vec2f> garis, cv::Mat bw)
       right_goal_coor = cv::Point(cent_x, cent_y);
       goal_detected = false;
       if (draw_output) {
-        putText(image, "TRY", boundRight[0], 1, 1.2, cv::Scalar(0, 255, 0), 1);
-        putText(image, "BRY", boundRight[1], 1, 1.2, cv::Scalar(0, 255, 0), 1);
+        cv::putText(image, "TRY", boundRight[0], 1, 1.2, cv::Scalar(0, 255, 0), 1);
+        cv::putText(image, "BRY", boundRight[1], 1, 1.2, cv::Scalar(0, 255, 0), 1);
       }
     }
   } else {
@@ -405,22 +412,22 @@ void GoalpostFinder::process_line(std::vector<cv::Vec2f> garis, cv::Mat bw)
       right_goal_coor = cv::Point(cent_x, cent_y);
       goal_detected = false;
       if (draw_output) {
-        putText(image, "TRY", bound[0], 1, 1.2, cv::Scalar(0, 255, 0), 1);
-        putText(image, "BRY", bound[1], 1, 1.2, cv::Scalar(0, 255, 0), 1);
+        cv::putText(image, "TRY", bound[0], 1, 1.2, cv::Scalar(0, 255, 0), 1);
+        cv::putText(image, "BRY", bound[1], 1, 1.2, cv::Scalar(0, 255, 0), 1);
       }
     } else if (aArea - bArea < -20) {
       left_goal_height = height;
       left_goal_coor = cv::Point(cent_x, cent_y);
       goal_detected = false;
       if (draw_output) {
-        putText(image, "TLY", bound[0], 1, 1.2, cv::Scalar(0, 255, 0), 1);
-        putText(image, "BLY", bound[1], 1, 1.2, cv::Scalar(0, 255, 0), 1);
+        cv::putText(image, "TLY", bound[0], 1, 1.2, cv::Scalar(0, 255, 0), 1);
+        cv::putText(image, "BLY", bound[1], 1, 1.2, cv::Scalar(0, 255, 0), 1);
       }
     } else {
       goal_detected = true;
       if (draw_output) {
-        putText(image, "?", bound[0], 1, 1.2, cv::Scalar(0, 255, 0), 1);
-        putText(image, "?", bound[1], 1, 1.2, cv::Scalar(0, 255, 0), 1);
+        cv::putText(image, "?", bound[0], 1, 1.2, cv::Scalar(0, 255, 0), 1);
+        cv::putText(image, "?", bound[1], 1, 1.2, cv::Scalar(0, 255, 0), 1);
       }
     }
   }
@@ -559,8 +566,8 @@ void GoalpostFinder::process_line(std::vector<cv::Vec2f> garis, cv::Mat bw, cv::
           left_goal_height = -1;
           left_goal_coor = cv::Point(-1, -1);
           if (draw_output) {
-            putText(image, "TRY", tmp_realBound[0], 1, 1.2, cv::Scalar(0, 255, 0), 1);
-            putText(image, "BRY", tmp_realBound[1], 1, 1.2, cv::Scalar(0, 255, 0), 1);
+            cv::putText(image, "TRY", tmp_realBound[0], 1, 1.2, cv::Scalar(0, 255, 0), 1);
+            cv::putText(image, "BRY", tmp_realBound[1], 1, 1.2, cv::Scalar(0, 255, 0), 1);
           }
         }
         return;
@@ -624,19 +631,19 @@ void GoalpostFinder::process_line(std::vector<cv::Vec2f> garis, cv::Mat bw, cv::
         right_goal_coor = real_center;
         goal_detected = false;
         if (draw_output) {
-          putText(image, "TRY", real_bound[0], 1, 1.2, cv::Scalar(0, 255, 0), 1);
-          putText(image, "BRY", real_bound[1], 1, 1.2, cv::Scalar(0, 255, 0), 1);
+          cv::putText(image, "TRY", real_bound[0], 1, 1.2, cv::Scalar(0, 255, 0), 1);
+          cv::putText(image, "BRY", real_bound[1], 1, 1.2, cv::Scalar(0, 255, 0), 1);
 
-          putText(image, "TLY", tmp_realBound[0], 1, 1.2, cv::Scalar(0, 255, 0), 1);
-          putText(image, "BLY", tmp_realBound[1], 1, 1.2, cv::Scalar(0, 255, 0), 1);
+          cv::putText(image, "TLY", tmp_realBound[0], 1, 1.2, cv::Scalar(0, 255, 0), 1);
+          cv::putText(image, "BLY", tmp_realBound[1], 1, 1.2, cv::Scalar(0, 255, 0), 1);
         }
       } else {
         left_goal_height = real_height;
         left_goal_coor = real_center;
         goal_detected = false;
         if (draw_output) {
-          putText(image, "TLY", real_bound[0], 1, 1.2, cv::Scalar(0, 255, 0), 1);
-          putText(image, "BLY", real_bound[1], 1, 1.2, cv::Scalar(0, 255, 0), 1);
+          cv::putText(image, "TLY", real_bound[0], 1, 1.2, cv::Scalar(0, 255, 0), 1);
+          cv::putText(image, "BLY", real_bound[1], 1, 1.2, cv::Scalar(0, 255, 0), 1);
         }
       }
     } else {
@@ -651,8 +658,8 @@ void GoalpostFinder::process_line(std::vector<cv::Vec2f> garis, cv::Mat bw, cv::
           std::cout << tmp_realBound[0].x << ", " << tmp_realBound[0].y << std::endl;
           std::cout << tmp_realBound[1].x << ", " << tmp_realBound[1].y << std::endl;
           if (draw_output) {
-            putText(image, "TRY", tmp_realBound[0], 1, 1.2, cv::Scalar(0, 255, 0), 1);
-            putText(image, "BRY", tmp_realBound[1], 1, 1.2, cv::Scalar(0, 255, 0), 1);
+            cv::putText(image, "TRY", tmp_realBound[0], 1, 1.2, cv::Scalar(0, 255, 0), 1);
+            cv::putText(image, "BRY", tmp_realBound[1], 1, 1.2, cv::Scalar(0, 255, 0), 1);
           }
         }
         return;
@@ -679,19 +686,19 @@ void GoalpostFinder::process_line(std::vector<cv::Vec2f> garis, cv::Mat bw, cv::
         right_goal_coor = cv::Point(cent_x, cent_y);
         goal_detected = false;
         if (draw_output) {
-          putText(image, "TRY", boundRight[0], 1, 1.2, cv::Scalar(0, 255, 0), 1);
-          putText(image, "BRY", boundRight[1], 1, 1.2, cv::Scalar(0, 255, 0), 1);
+          cv::putText(image, "TRY", boundRight[0], 1, 1.2, cv::Scalar(0, 255, 0), 1);
+          cv::putText(image, "BRY", boundRight[1], 1, 1.2, cv::Scalar(0, 255, 0), 1);
 
-          putText(image, "TLY", tmp_realBound[0], 1, 1.2, cv::Scalar(0, 255, 0), 1);
-          putText(image, "BLY", tmp_realBound[1], 1, 1.2, cv::Scalar(0, 255, 0), 1);
+          cv::putText(image, "TLY", tmp_realBound[0], 1, 1.2, cv::Scalar(0, 255, 0), 1);
+          cv::putText(image, "BLY", tmp_realBound[1], 1, 1.2, cv::Scalar(0, 255, 0), 1);
         }
       } else {
         left_goal_height = height;
         left_goal_coor = cv::Point(cent_x, cent_y);
         goal_detected = false;
         if (draw_output) {
-          putText(image, "TLY", boundRight[0], 1, 1.2, cv::Scalar(0, 255, 0), 1);
-          putText(image, "BLY", boundRight[0], 1, 1.2, cv::Scalar(0, 255, 0), 1);
+          cv::putText(image, "TLY", boundRight[0], 1, 1.2, cv::Scalar(0, 255, 0), 1);
+          cv::putText(image, "BLY", boundRight[0], 1, 1.2, cv::Scalar(0, 255, 0), 1);
         }
       }
     }
@@ -738,22 +745,22 @@ void GoalpostFinder::process_line(std::vector<cv::Vec2f> garis, cv::Mat bw, cv::
       right_goal_coor = cv::Point(cent_x, cent_y);
       goal_detected = false;
       if (draw_output) {
-        putText(image, "TRY", bound[0], 1, 1.2, cv::Scalar(0, 255, 0), 1);
-        putText(image, "BRY", bound[1], 1, 1.2, cv::Scalar(0, 255, 0), 1);
+        cv::putText(image, "TRY", bound[0], 1, 1.2, cv::Scalar(0, 255, 0), 1);
+        cv::putText(image, "BRY", bound[1], 1, 1.2, cv::Scalar(0, 255, 0), 1);
       }
     } else if (aArea - bArea < -20) {
       left_goal_height = height;
       left_goal_coor = cv::Point(cent_x, cent_y);
       goal_detected = false;
       if (draw_output) {
-        putText(image, "TLY", bound[0], 1, 1.2, cv::Scalar(0, 255, 0), 1);
-        putText(image, "BLY", bound[1], 1, 1.2, cv::Scalar(0, 255, 0), 1);
+        cv::putText(image, "TLY", bound[0], 1, 1.2, cv::Scalar(0, 255, 0), 1);
+        cv::putText(image, "BLY", bound[1], 1, 1.2, cv::Scalar(0, 255, 0), 1);
       }
     } else {
       goal_detected = true;
       if (draw_output) {
-        putText(image, "?", bound[0], 1, 1.2, cv::Scalar(0, 255, 0), 1);
-        putText(image, "?", bound[1], 1, 1.2, cv::Scalar(0, 255, 0), 1);
+        cv::putText(image, "?", bound[0], 1, 1.2, cv::Scalar(0, 255, 0), 1);
+        cv::putText(image, "?", bound[1], 1, 1.2, cv::Scalar(0, 255, 0), 1);
       }
     }
   }
