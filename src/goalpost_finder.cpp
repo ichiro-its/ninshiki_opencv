@@ -71,61 +71,97 @@ double GoalpostFinder::find_area_roi(cv::Mat fr, cv::Point stR, cv::Point spR)
       start_roi.x, start_roi.y, stop_roi.x - start_roi.x,
       stop_roi.y - start_roi.y));
   double totalArea = buff.cols * buff.rows;
-  
+
   // cv::cvtColor(buff, buff, cv::COLOR_BGR2GRAY);
   double count = countNonZero(buff);
   buff.release();
   return count * 100 / totalArea;
 }
 
-std::vector<cv::Point> GoalpostFinder::detect_goal(std::shared_ptr<SensorMeasurements> sensor)
+std::vector<cv::Point> GoalpostFinder::detect_goal_by_hof(cv::Mat gray)
 {
   std::vector<cv::Point> coordinate(2);
-  if (sensor.get()->cameras_size() > 0) {
-    
-  auto camera = sensor.get()->cameras(0);
-    cv::Mat sensor_image(static_cast<int>(camera.height()),
-      static_cast<int>(camera.width()), CV_8UC3, std::string(
-        camera.image()).data());
-    
-    camera_height = camera.height();
-    camera_width = camera.width();
-    image.create(camera_height, camera_width, CV_8UC3);
-    output_buffer.create(camera_height, camera_width, CV_8UC3);
-    cv::Point empty_point(-1, -1);
-    right_goal_coor = empty_point;
-    left_goal_coor = empty_point;
-    right_goal_height = 0;
-    left_goal_height = 0;
-    cv::Mat rgb(camera_height, camera_width, CV_8UC3);
+  // if (sensor.get()->cameras_size() > 0) {
 
-    left_goal_found = false;
-    right_goal_found = false;
+  // auto camera = sensor.get()->cameras(0);
+  //   cv::Mat sensor_image(static_cast<int>(camera.height()),
+  //     static_cast<int>(camera.width()), CV_8UC3, std::string(
+  //       camera.image()).data());
+  cv::Size img_size = gray.size();
+  camera_height = img_size.height;
+  camera_width = img_size.width;
+  std::cout << "in function detect_goal = " << camera_width << " " << camera_height << std::endl;
+  // image.create(camera_height, camera_width, CV_8UC3);
+  // output_buffer.create(camera_height, camera_width, CV_8UC3);
+  cv::Point empty_point(-1, -1);
+  right_goal_coor = empty_point;
+  left_goal_coor = empty_point;
+  right_goal_height = 0;
+  left_goal_height = 0;
+  // cv::Mat rgb(camera_height, camera_width, CV_8UC3);
 
-    left_goal_distance = 0.0;
-    right_goal_distance = 0.0;
-    rgb = sensor_image.clone();
+  left_goal_found = false;
+  right_goal_found = false;
 
-    image = rgb.clone();
-    process_image(sensor_image);
-    rgb.release();
+  left_goal_distance = 0.0;
+  right_goal_distance = 0.0;
+  // rgb = sensor_image.clone();
 
-    output_buffer = image.clone();
+  // image = rgb.clone();
+  process_image(gray);
+  // rgb.release();
 
-    coordinate[0] = left_goal_coor;
-    coordinate[1] = right_goal_coor;
-    
-    if (left_goal_coor.x > 0 && left_goal_coor.y > 0) {
-      left_goal_found = true;
+  // output_buffer = image.clone();
+
+  coordinate[0] = left_goal_coor;
+  coordinate[1] = right_goal_coor;
+
+  if (left_goal_coor.x > 0 && left_goal_coor.y > 0) {
+    left_goal_found = true;
+  }
+  if (right_goal_coor.x > 0 && right_goal_coor.y > 0) {
+    right_goal_found = true;
+  }
+  // }
+  return coordinate;
+}
+
+std::vector<cv::Point> GoalpostFinder::detect_goal(cv::Mat sensor_image)
+{
+  std::vector<cv::Point> coordinate(2);
+
+  cv::Mat gray, thresh;
+
+  cv::cvtColor(sensor_image, gray, cv::COLOR_BGR2GRAY);
+  cv::threshold(gray, thresh, 210, 255, cv::THRESH_BINARY);
+
+  // detect goal post just by threshold
+  if (detect_goal_post_by == 0) {
+    std::vector<std::vector<cv::Point>> contours;
+    std::vector<cv::Vec4i> hierarchy;
+    findContours(thresh, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
+
+    if (contours.size() != 0) {
+      auto contour = *std::max_element(
+        contours.begin(), contours.end(),
+        [](std::vector<cv::Point> const & lhs, std::vector<cv::Point> const & rhs)
+        {
+          return contourArea(lhs, false) < contourArea(rhs, false);
+        });
+      if (cv::contourArea(contour) > 400) {
+        auto bound_rect = cv::boundingRect(contour);
+        coordinate[0] = bound_rect.tl();
+        coordinate[1] = bound_rect.br();
+      }
     }
-    if (right_goal_coor.x > 0 && right_goal_coor.y > 0) {
-      right_goal_found = true;
-    }
+    // detect goal post by threshold and hof
+  } else if (detect_goal_post_by == 1) {
+    coordinate = GoalpostFinder::detect_goal_by_hof(thresh);
   }
   return coordinate;
 }
 
-void GoalpostFinder::process_image(cv::Mat binBuffer)
+void GoalpostFinder::process_image(cv::Mat gray)
 {
   cv::Mat bw(camera_height, camera_width, CV_8UC1);
   cv::Mat bw2(camera_height, camera_width, CV_8UC1);
@@ -133,9 +169,9 @@ void GoalpostFinder::process_image(cv::Mat binBuffer)
   cv::Mat check(camera_height, camera_width, CV_8UC1);
   std::vector<cv::Vec2f> lines;
 
-  bw = binBuffer.clone();
-  cv::cvtColor(bw, bw, cv::COLOR_BGR2GRAY);
-  if (countNonZero(check) > 10) {
+  bw = gray.clone();
+  // cv::cvtColor(bw, bw, cv::COLOR_BGR2GRAY);
+  if (countNonZero(bw) > 10) {
     cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
     morphologyEx(bw, bw, cv::MORPH_OPEN, element);
     morphologyEx(bw1, bw1, cv::MORPH_OPEN, element);

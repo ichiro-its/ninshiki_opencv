@@ -36,7 +36,9 @@ class Detector
 public:
   Detector();
 
-  void vision_process(std::shared_ptr<SensorMeasurements> sensor, cv::Mat image_hsv, cv::Mat image_rgb);
+  void vision_process(
+    std::shared_ptr<SensorMeasurements> sensor, cv::Mat image_hsv,
+    cv::Mat image_rgb);
 
   cv::Mat get_image(std::shared_ptr<SensorMeasurements> sensor);
   const Contours & get_field_contours() const;
@@ -49,7 +51,20 @@ public:
   float get_post_right_x() {return post_right_x;}
   float get_post_right_y() {return post_right_y;}
 
+  int get_detect_goal_post_by() {return detect_goal_post_by;}
+
+  void detect_goal_by_threshold() {detect_goal_post_by = BY_THRESHOLD;}
+  void detect_goal_by_threshold_and_hof() {detect_goal_post_by = BY_THRESHOLD_AND_HOF;}
+
 private:
+  enum
+  {
+    BY_THRESHOLD,
+    BY_THRESHOLD_AND_HOF
+  };
+
+  int detect_goal_post_by;
+
   std::shared_ptr<ColorClassifier> field_classifier;
   Contours field_contours;
 
@@ -61,7 +76,7 @@ private:
   float post_right_x;
   float post_right_y;
 
-  bool detect_goal_post;
+  bool is_detect_goal_post;
 };
 
 }  // namespace ninshiki_opencv

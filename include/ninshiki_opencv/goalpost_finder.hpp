@@ -35,19 +35,14 @@ namespace ninshiki_opencv
 class GoalpostFinder
 {
 public:
-  bool goal_detected;
-  bool left_goal_found;
-  bool right_goal_found;
-  int left_goal_height;
-  int right_goal_height;
-  int bawah_tiang;
-
-  cv::Mat output_buffer;
-
   GoalpostFinder();
-  std::vector<cv::Point> detect_goal(std::shared_ptr<SensorMeasurements> sensor);
+  std::vector<cv::Point> detect_goal(cv::Mat sensor_image);
+  std::vector<cv::Point> detect_goal_by_hof(cv::Mat sensor_image);
+
   double get_left_goal_distance();
   double get_right_goal_distance();
+
+  void set_detect_goal_post_by(int i) {detect_goal_post_by = i;}
 
 private:
   enum FilterLineOption
@@ -62,6 +57,16 @@ private:
     SMALL
   };
 
+  int detect_goal_post_by;
+
+  bool goal_detected;
+  bool left_goal_found;
+  bool right_goal_found;
+  int left_goal_height;
+  int right_goal_height;
+  int bawah_tiang;
+
+  cv::Mat output_buffer;
   cv::Mat image;
 
   float camera_height;
