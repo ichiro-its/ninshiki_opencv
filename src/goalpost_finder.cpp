@@ -72,7 +72,6 @@ double GoalpostFinder::find_area_roi(cv::Mat fr, cv::Point stR, cv::Point spR)
       stop_roi.y - start_roi.y));
   double totalArea = buff.cols * buff.rows;
 
-  // cv::cvtColor(buff, buff, cv::COLOR_BGR2GRAY);
   double count = countNonZero(buff);
   buff.release();
   return count * 100 / totalArea;
@@ -81,37 +80,24 @@ double GoalpostFinder::find_area_roi(cv::Mat fr, cv::Point stR, cv::Point spR)
 std::vector<cv::Point> GoalpostFinder::detect_goal_by_hof(cv::Mat gray)
 {
   std::vector<cv::Point> coordinate(2);
-  // if (sensor.get()->cameras_size() > 0) {
 
-  // auto camera = sensor.get()->cameras(0);
-  //   cv::Mat sensor_image(static_cast<int>(camera.height()),
-  //     static_cast<int>(camera.width()), CV_8UC3, std::string(
-  //       camera.image()).data());
   cv::Size img_size = gray.size();
   camera_height = img_size.height;
   camera_width = img_size.width;
-  std::cout << "in function detect_goal = " << camera_width << " " << camera_height << std::endl;
-  // image.create(camera_height, camera_width, CV_8UC3);
-  // output_buffer.create(camera_height, camera_width, CV_8UC3);
+
   cv::Point empty_point(-1, -1);
   right_goal_coor = empty_point;
   left_goal_coor = empty_point;
   right_goal_height = 0;
   left_goal_height = 0;
-  // cv::Mat rgb(camera_height, camera_width, CV_8UC3);
 
   left_goal_found = false;
   right_goal_found = false;
 
   left_goal_distance = 0.0;
   right_goal_distance = 0.0;
-  // rgb = sensor_image.clone();
 
-  // image = rgb.clone();
   process_image(gray);
-  // rgb.release();
-
-  // output_buffer = image.clone();
 
   coordinate[0] = left_goal_coor;
   coordinate[1] = right_goal_coor;
@@ -122,7 +108,6 @@ std::vector<cv::Point> GoalpostFinder::detect_goal_by_hof(cv::Mat gray)
   if (right_goal_coor.x > 0 && right_goal_coor.y > 0) {
     right_goal_found = true;
   }
-  // }
   return coordinate;
 }
 
@@ -170,7 +155,6 @@ void GoalpostFinder::process_image(cv::Mat gray)
   std::vector<cv::Vec2f> lines;
 
   bw = gray.clone();
-  // cv::cvtColor(bw, bw, cv::COLOR_BGR2GRAY);
   if (countNonZero(bw) > 10) {
     cv::Mat element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
     morphologyEx(bw, bw, cv::MORPH_OPEN, element);
