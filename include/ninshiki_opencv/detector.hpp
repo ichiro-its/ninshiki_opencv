@@ -54,18 +54,19 @@ public:
   int get_detect_goal_post_by() {return detect_goal_post_by;}
 
   void detect_goal_by_threshold() {detect_goal_post_by = BY_THRESHOLD;}
-  void detect_goal_by_threshold_and_hof() {detect_goal_post_by = BY_THRESHOLD_AND_HOF;}
+  void detect_goal_by_threshold_and_hough() {detect_goal_post_by = BY_THRESHOLD_AND_HOUGH;}
 
 private:
   enum
   {
     BY_THRESHOLD,
-    BY_THRESHOLD_AND_HOF
+    BY_THRESHOLD_AND_HOUGH
   };
 
   int detect_goal_post_by;
 
   std::shared_ptr<ColorClassifier> field_classifier;
+  std::shared_ptr<LBPClassifier> lbp_classifier;
   Contours field_contours;
 
   float ball_pos_x;
