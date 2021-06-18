@@ -43,7 +43,7 @@ Detector::Detector()
   post_right_x = -1;
   post_right_y = -1;
 
-  is_detect_goal_post = true;
+  detect_goal_post = false;
 }
 
 cv::Mat Detector::get_image(std::shared_ptr<SensorMeasurements> sensor)
@@ -64,6 +64,11 @@ const Contours & Detector::get_field_contours() const
   return field_contours;
 }
 
+void Detector::set_detect_goal_post(const bool & detect)
+{
+  detect_goal_post = detect;
+}
+
 void Detector::vision_process(
   std::shared_ptr<SensorMeasurements> sensor, cv::Mat image_hsv,
   cv::Mat image_rgb)
@@ -82,24 +87,21 @@ void Detector::vision_process(
   cv::cvtColor(lbp_input, lbp_input, cv::COLOR_BGR2GRAY);
 
   cv::bitwise_and(field_contours.getBinaryMat(mat_size), lbp_input, lbp_input);
+  cv::imshow("field", field_contours.getBinaryMat(mat_size));
+
   cv::cvtColor(lbp_input, lbp_input, cv::COLOR_GRAY2BGR);
 
   Rects ball_rects;
   ball_rects = lbp_classifier->classify(lbp_input);
   ball_rects.filterLargest();
 
-  ninshiki_opencv::GoalpostFinder goal_post;
-  goal_post.set_detect_goal_post_by(Detector::get_detect_goal_post_by());
-  if (is_detect_goal_post) {
+  goal_post.set_detect_goal_post_by(detect_goal_post_by);
+  if (detect_goal_post) {
     auto coordinate = goal_post.detect_goal(image_rgb);
     post_left_x = coordinate[0].x;
     post_left_y = coordinate[0].y;
     post_right_x = coordinate[1].x;
     post_right_y = coordinate[1].y;
-    std::cout << "detector : goal_post_left_x = " << post_left_x << " goal_post_left_y = " <<
-      post_left_y << std::endl;
-    std::cout << "detector : goal_post_right_x = " << post_right_x << " goal_post_right_y = " <<
-      post_right_y << std::endl;
   }
 
   ball_pos_x = ball_rects.getFirstRectCenter().x;

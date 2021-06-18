@@ -77,7 +77,7 @@ double GoalpostFinder::find_area_roi(cv::Mat fr, cv::Point stR, cv::Point spR)
   return count * 100 / totalArea;
 }
 
-std::vector<cv::Point> GoalpostFinder::detect_goal_by_hof(cv::Mat gray)
+std::vector<cv::Point> GoalpostFinder::detect_goal_by_hough(cv::Mat gray)
 {
   std::vector<cv::Point> coordinate(2);
 
@@ -139,10 +139,12 @@ std::vector<cv::Point> GoalpostFinder::detect_goal(cv::Mat sensor_image)
         coordinate[1] = bound_rect.br();
       }
     }
-    // detect goal post by threshold and hof
-  } else if (detect_goal_post_by == 1) {
-    coordinate = GoalpostFinder::detect_goal_by_hof(thresh);
   }
+  // detect goal post by threshold and hough
+  if (detect_goal_post_by == 1) {
+    coordinate = GoalpostFinder::detect_goal_by_hough(thresh);
+  }
+
   return coordinate;
 }
 

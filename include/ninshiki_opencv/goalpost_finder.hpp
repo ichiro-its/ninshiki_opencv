@@ -37,7 +37,7 @@ class GoalpostFinder
 public:
   GoalpostFinder();
   std::vector<cv::Point> detect_goal(cv::Mat sensor_image);
-  std::vector<cv::Point> detect_goal_by_hof(cv::Mat sensor_image);
+  std::vector<cv::Point> detect_goal_by_hough(cv::Mat sensor_image);
 
   double get_left_goal_distance();
   double get_right_goal_distance();

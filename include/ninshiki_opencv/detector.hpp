@@ -56,6 +56,8 @@ public:
   void detect_goal_by_threshold() {detect_goal_post_by = BY_THRESHOLD;}
   void detect_goal_by_threshold_and_hough() {detect_goal_post_by = BY_THRESHOLD_AND_HOUGH;}
 
+  void set_detect_goal_post(const bool & detect);
+
 private:
   enum
   {
@@ -67,6 +69,7 @@ private:
 
   std::shared_ptr<ColorClassifier> field_classifier;
   std::shared_ptr<LBPClassifier> lbp_classifier;
+  GoalpostFinder goal_post;
   Contours field_contours;
 
   float ball_pos_x;
@@ -77,7 +80,7 @@ private:
   float post_right_x;
   float post_right_y;
 
-  bool is_detect_goal_post;
+  bool detect_goal_post;
 };
 
 }  // namespace ninshiki_opencv
