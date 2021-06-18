@@ -72,7 +72,7 @@ int main(int argc, char * argv[])
       cv::cvtColor(frame, frame_hsv, cv::COLOR_BGR2HSV);
 
       detector.detect_goal_by_threshold();
-      detector.vision_process(sensors, frame_hsv, frame);
+      detector.vision_process(frame_hsv, frame);
       auto field_contour = detector.get_field_contours();
 
       if (detector.get_post_left_x() > -1 && detector.get_post_left_y() > -1 &&

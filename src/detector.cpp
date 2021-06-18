@@ -69,9 +69,7 @@ void Detector::set_detect_goal_post(const bool & detect)
   detect_goal_post = detect;
 }
 
-void Detector::vision_process(
-  std::shared_ptr<SensorMeasurements> sensor, cv::Mat image_hsv,
-  cv::Mat image_rgb)
+void Detector::vision_process(cv::Mat image_hsv, cv::Mat image_rgb)
 {
   cv::Size mat_size = image_hsv.size();
   cv::Mat field_binary_mat = field_classifier->classify(image_hsv);

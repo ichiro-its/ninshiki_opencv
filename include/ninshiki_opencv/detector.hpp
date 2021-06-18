@@ -36,9 +36,7 @@ class Detector
 public:
   Detector();
 
-  void vision_process(
-    std::shared_ptr<SensorMeasurements> sensor, cv::Mat image_hsv,
-    cv::Mat image_rgb);
+  void vision_process(cv::Mat image_hsv, cv::Mat image_rgb);
 
   cv::Mat get_image(std::shared_ptr<SensorMeasurements> sensor);
   const Contours & get_field_contours() const;
