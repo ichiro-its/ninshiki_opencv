@@ -87,7 +87,6 @@ void Detector::vision_process(
   cv::cvtColor(lbp_input, lbp_input, cv::COLOR_BGR2GRAY);
 
   cv::bitwise_and(field_contours.getBinaryMat(mat_size), lbp_input, lbp_input);
-  cv::imshow("field", field_contours.getBinaryMat(mat_size));
 
   cv::cvtColor(lbp_input, lbp_input, cv::COLOR_GRAY2BGR);
 
