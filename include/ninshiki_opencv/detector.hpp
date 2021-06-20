@@ -23,6 +23,7 @@
 
 #include <opencv2/opencv.hpp>
 #include <robocup_client/robocup_client.hpp>
+#include <ninshiki_opencv/goalpost_finder.hpp>
 
 #include <memory>
 
@@ -43,12 +44,41 @@ public:
   float get_ball_pos_x() {return ball_pos_x;}
   float get_ball_pos_y() {return ball_pos_y;}
 
+  float get_post_left_x() {return post_left_x;}
+  float get_post_left_y() {return post_left_y;}
+  float get_post_right_x() {return post_right_x;}
+  float get_post_right_y() {return post_right_y;}
+
+  int get_detect_goal_post_by() {return detect_goal_post_by;}
+
+  void detect_goal_by_threshold() {detect_goal_post_by = BY_THRESHOLD;}
+  void detect_goal_by_threshold_and_hough() {detect_goal_post_by = BY_THRESHOLD_AND_HOUGH;}
+
+  void set_detect_goal_post(const bool & detect);
+
 private:
+  enum
+  {
+    BY_THRESHOLD,
+    BY_THRESHOLD_AND_HOUGH
+  };
+
+  int detect_goal_post_by;
+
   std::shared_ptr<ColorClassifier> field_classifier;
+  std::shared_ptr<LBPClassifier> lbp_classifier;
+  GoalpostFinder goal_post;
   Contours field_contours;
 
   float ball_pos_x;
   float ball_pos_y;
+
+  float post_left_x;
+  float post_left_y;
+  float post_right_x;
+  float post_right_y;
+
+  bool detect_goal_post;
 };
 
 }  // namespace ninshiki_opencv

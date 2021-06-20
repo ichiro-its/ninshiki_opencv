@@ -25,6 +25,7 @@
 #include <opencv2/videoio.hpp>
 #include <opencv2/highgui.hpp>
 #include <ninshiki_opencv/detector.hpp>
+#include <ninshiki_opencv/goalpost_finder.hpp>
 #include <robocup_client/robocup_client.hpp>
 
 #include <unistd.h>
@@ -57,24 +58,47 @@ int main(int argc, char * argv[])
   cv::Mat frame_hsv;
   cv::Mat field_mask;
 
+  ninshiki_opencv::Detector detector;
+
   while (client.get_tcp_socket()->is_connected()) {
     client.send(*message.get_actuator_request());
     auto sensors = client.receive();
 
     if (sensors.get()->cameras_size() > 0) {
-      std::cout << sensors.get()->cameras(0).height() << std::endl;
-
-      ninshiki_opencv::Detector detector;
       cv::Mat temp = detector.get_image(sensors);
 
       frame = temp.clone();
       frame_hsv = temp.clone();
       cv::cvtColor(frame, frame_hsv, cv::COLOR_BGR2HSV);
 
+      detector.detect_goal_by_threshold();
       detector.vision_process(frame_hsv, frame);
+      auto field_contour = detector.get_field_contours();
 
-      std::cout << "position x = " << detector.get_ball_pos_x() << std::endl;
-      std::cout << "position y = " << detector.get_ball_pos_y() << std::endl;
+      if (detector.get_post_left_x() > -1 && detector.get_post_left_y() > -1 &&
+        detector.get_post_right_x() > -1 && detector.get_post_right_y() > -1)
+      {
+        if (detector.get_post_left_y() < field_contour.minY() &&
+          detector.get_post_right_y() > field_contour.minY() &&
+          detector.get_post_right_y() < field_contour.maxY())
+        {
+          cv::rectangle(
+            frame, cv::Point(detector.get_post_left_x(), detector.get_post_left_y()),
+            cv::Point(detector.get_post_right_x(), detector.get_post_right_y()),
+            cv::Scalar(255, 0, 0), 3);
+          cv::circle(
+            frame, cv::Point(detector.get_post_left_x(), detector.get_post_left_y()), 5, cv::Scalar(
+              0, 0, 0), cv::FILLED, cv::LINE_8);
+          cv::circle(
+            frame, cv::Point(
+              detector.get_post_right_x(),
+              detector.get_post_right_y()), 5, cv::Scalar(
+              0, 0, 0), cv::FILLED, cv::LINE_8);
+        }
+      }
+
+      std::cout << "ball position x = " << detector.get_ball_pos_x() << std::endl;
+      std::cout << "ball position y = " << detector.get_ball_pos_y() << std::endl;
 
       // draw red circle on ball
       cv::circle(

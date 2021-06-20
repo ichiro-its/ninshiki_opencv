@@ -25,7 +25,8 @@
 namespace ninshiki_opencv
 {
 Detector::Detector()
-: field_classifier(std::make_shared<ColorClassifier>(ColorClassifier::CLASSIFIER_TYPE_FIELD))
+: field_classifier(std::make_shared<ColorClassifier>(ColorClassifier::CLASSIFIER_TYPE_FIELD)),
+  lbp_classifier(std::make_shared<LBPClassifier>(LBPClassifier::CLASSIFIER_TYPE_BALL))
 {
   field_classifier->setHue(71);
   field_classifier->setHueTolerance(25);
@@ -36,6 +37,13 @@ Detector::Detector()
 
   ball_pos_x = -1;
   ball_pos_y = -1;
+
+  post_left_x = -1;
+  post_left_y = -1;
+  post_right_x = -1;
+  post_right_y = -1;
+
+  detect_goal_post = false;
 }
 
 cv::Mat Detector::get_image(std::shared_ptr<SensorMeasurements> sensor)
@@ -43,11 +51,11 @@ cv::Mat Detector::get_image(std::shared_ptr<SensorMeasurements> sensor)
   cv::Mat temp;
 
   auto camera = sensor.get()->cameras(0);
-  cv::Mat coba(static_cast<int>(camera.height()),
+  cv::Mat sensor_image(static_cast<int>(camera.height()),
     static_cast<int>(camera.width()), CV_8UC3, std::string(
       camera.image()).data());
 
-  temp = coba.clone();
+  temp = sensor_image.clone();
   return temp;
 }
 
@@ -56,10 +64,13 @@ const Contours & Detector::get_field_contours() const
   return field_contours;
 }
 
+void Detector::set_detect_goal_post(const bool & detect)
+{
+  detect_goal_post = detect;
+}
+
 void Detector::vision_process(cv::Mat image_hsv, cv::Mat image_rgb)
 {
-  LBPClassifier * lbp_classifier = new LBPClassifier(LBPClassifier::CLASSIFIER_TYPE_BALL);
-
   cv::Size mat_size = image_hsv.size();
   cv::Mat field_binary_mat = field_classifier->classify(image_hsv);
 
@@ -74,11 +85,21 @@ void Detector::vision_process(cv::Mat image_hsv, cv::Mat image_rgb)
   cv::cvtColor(lbp_input, lbp_input, cv::COLOR_BGR2GRAY);
 
   cv::bitwise_and(field_contours.getBinaryMat(mat_size), lbp_input, lbp_input);
+
   cv::cvtColor(lbp_input, lbp_input, cv::COLOR_GRAY2BGR);
 
   Rects ball_rects;
   ball_rects = lbp_classifier->classify(lbp_input);
   ball_rects.filterLargest();
+
+  goal_post.set_detect_goal_post_by(detect_goal_post_by);
+  if (detect_goal_post) {
+    auto coordinate = goal_post.detect_goal(image_rgb);
+    post_left_x = coordinate[0].x;
+    post_left_y = coordinate[0].y;
+    post_right_x = coordinate[1].x;
+    post_right_y = coordinate[1].y;
+  }
 
   ball_pos_x = ball_rects.getFirstRectCenter().x;
   ball_pos_y = ball_rects.getFirstRectCenter().y;
