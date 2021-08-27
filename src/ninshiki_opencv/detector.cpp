@@ -46,18 +46,18 @@ Detector::Detector()
   detect_goal_post = false;
 }
 
-cv::Mat Detector::get_image(std::shared_ptr<SensorMeasurements> sensor)
-{
-  cv::Mat temp;
+// cv::Mat Detector::get_image(std::shared_ptr<SensorMeasurements> sensor)
+// {
+//   cv::Mat temp;
 
-  auto camera = sensor.get()->cameras(0);
-  cv::Mat sensor_image(static_cast<int>(camera.height()),
-    static_cast<int>(camera.width()), CV_8UC3, std::string(
-      camera.image()).data());
+//   auto camera = sensor.get()->cameras(0);
+//   cv::Mat sensor_image(static_cast<int>(camera.height()),
+//     static_cast<int>(camera.width()), CV_8UC3, std::string(
+//       camera.image()).data());
 
-  temp = sensor_image.clone();
-  return temp;
-}
+//   temp = sensor_image.clone();
+//   return temp;
+// }
 
 const Contours & Detector::get_field_contours() const
 {

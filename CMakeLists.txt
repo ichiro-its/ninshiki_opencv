@@ -18,18 +18,19 @@ find_package(ament_cmake REQUIRED)
 find_package(framework_vision REQUIRED)
 find_package(keisan REQUIRED)
 find_package(OpenCV REQUIRED)
-find_package(robocup_client REQUIRED)
 
 add_library(${PROJECT_NAME} SHARED
-  "src/goalpost_finder.cpp"
-  "src/detector.cpp")
+  "src/${PROJECT_NAME}/goalpost_finder.cpp"
+  "src/${PROJECT_NAME}/detector.cpp")
 
 target_include_directories(${PROJECT_NAME} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
 
 ament_target_dependencies(${PROJECT_NAME}
-  OpenCV robocup_client keisan framework_vision)
+  OpenCV
+  keisan
+  framework_vision)
 
 install(DIRECTORY "include" DESTINATION ".")
 
@@ -39,18 +40,15 @@ install(TARGETS ${PROJECT_NAME}
   LIBRARY DESTINATION "lib"
   RUNTIME DESTINATION "bin")
 
-add_executable(example "examples/ball_detection_example")
-target_link_libraries(example ${PROJECT_NAME})
-
-install(TARGETS example
-  DESTINATION "lib/${PROJECT_NAME}")
-
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-ament_export_dependencies(OpenCV robocup_client keisan framework_vision)
+ament_export_dependencies(
+  OpenCV
+  keisan
+  framework_vision)
 ament_export_include_directories("include")
 ament_export_libraries(${PROJECT_NAME})
 ament_package()

@@ -22,7 +22,6 @@
 #define NINSHIKI_OPENCV__DETECTOR_HPP_
 
 #include <opencv2/opencv.hpp>
-#include <robocup_client/robocup_client.hpp>
 #include <ninshiki_opencv/goalpost_finder.hpp>
 
 #include <memory>
@@ -38,7 +37,7 @@ public:
 
   void vision_process(cv::Mat image_hsv, cv::Mat image_rgb);
 
-  cv::Mat get_image(std::shared_ptr<SensorMeasurements> sensor);
+  // cv::Mat get_image(std::shared_ptr<SensorMeasurements> sensor);
   const Contours & get_field_contours() const;
 
   float get_ball_pos_x() {return ball_pos_x;}
